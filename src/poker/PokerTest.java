@@ -10,6 +10,25 @@ import static org.junit.Assert.assertTrue;
 public class PokerTest {
 
     @Test
+    public void straightWinsOverThrees() {
+        PokerHand handA = new PokerHand("S6,D6,H4,C6,C3");
+        PokerHand handB = new PokerHand("D5,H6,C7,S8,H9");
+
+        assertTrue(handB.winsOver(handA));
+        assertFalse(handA.winsOver(handB));
+    }
+
+    @Test
+    public void straightWinsOverHighCard() {
+        PokerHand handA = new PokerHand("SA,DT,H4,C6,C3");
+        PokerHand handB = new PokerHand("D5,H6,C7,S8,H9");
+
+        assertTrue(handB.winsOver(handA));
+        assertFalse(handA.winsOver(handB));
+
+    }
+
+    @Test
     public void threeOfAKindWinsOverPairs() {
         PokerHand handA = new PokerHand("S6,D6,H4,C6,C3");
         PokerHand handB = new PokerHand("DA,D2,H7,C7,H2");
@@ -59,6 +78,7 @@ public class PokerTest {
         PokerHand handB = new PokerHand("SK,DQ,H3,C5,C3");
 
         assertTrue(handB.winsOver(handA));
+        assertFalse(handA.winsOver(handB));
 
     }
 

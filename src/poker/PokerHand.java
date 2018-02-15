@@ -11,11 +11,28 @@ public class PokerHand {
 
     private int threesValue;
 
+    private int straightStartingAt;
+
     public PokerHand(String cardString) {
         cards = parseToCards(cardString);
         cards.sort((o1, o2) -> o2.value - o1.value);
+        findStraight();
         findThreeOfAKind();
         findPairs();
+
+    }
+
+    private void findStraight() {
+        for (int i = 0; i < cards.size() - 1; i++) {
+            if (cards.get(i).value - cards.get(i + 1).value != 1) {
+                return;
+            }
+        }
+        straightStartingAt = cards.get(cards.size() - 1).value;
+    }
+
+    private boolean isStraight() {
+        return straightStartingAt > 0;
     }
 
     List<Card> parseToCards(String cardString) {
@@ -52,15 +69,23 @@ public class PokerHand {
 
     public int compare(PokerHand other) {
 
-        if (hasThreeOfAKind()) {
+        if (isStraight() || other.isStraight()) {
+            return compareStraights(other);
+        }
+
+        if (hasThreeOfAKind() || other.hasThreeOfAKind()) {
             return compareThrees(other);
         }
 
-        if (hasPair()) {
+        if (hasPair() || other.hasPair()) {
             return comparePairs(other);
         }
 
         return compareHighCard(other);
+    }
+
+    private int compareStraights(PokerHand other) {
+        return straightStartingAt - other.straightStartingAt;
     }
 
     private int compareThrees(PokerHand other) {
