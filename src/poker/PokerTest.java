@@ -10,6 +10,32 @@ import static org.junit.Assert.assertTrue;
 public class PokerTest {
 
     @Test
+    public void isFullHouse() {
+        PokerHand fullHouse = new PokerHand("SK,H3,DK,S3,HK");
+
+        assertTrue(fullHouse.isFullHouse());
+    }
+
+    @Test
+    public void flushWinsOverLowerFlush() {
+        PokerHand flushA = new PokerHand("S6,SA,SQ,S2,ST");
+        PokerHand flushB = new PokerHand("H6,HA,HQ,H2,H9");
+
+        assertTrue(flushA.winsOver(flushB));
+        assertFalse(flushB.winsOver(flushA));
+    }
+
+    @Test
+    public void flushWinsOverStraight() {
+        PokerHand flush = new PokerHand("S6,SA,SQ,S2,ST");
+        PokerHand straight = new PokerHand("D5,H6,C7,S8,H9");
+
+        assertTrue(flush.winsOver(straight));
+        assertFalse(straight.winsOver(flush));
+
+    }
+
+    @Test
     public void straightWinsOverThrees() {
         PokerHand handA = new PokerHand("S6,D6,H4,C6,C3");
         PokerHand handB = new PokerHand("D5,H6,C7,S8,H9");
@@ -53,13 +79,6 @@ public class PokerTest {
 
         assertTrue(handB.winsOver(handA));
         assertFalse(handA.winsOver(handB));
-    }
-
-    @Test
-    public void hasPair() {
-        PokerHand hand = new PokerHand("SK,DQ,H3,C5,C3");
-
-        assertTrue(hand.hasPair());
     }
 
     @Test

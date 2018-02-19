@@ -14,8 +14,8 @@ public class PokerHand {
     private int straightStartingAt;
 
     public PokerHand(String cardString) {
-        cards = parseToCards(cardString);
-        cards.sort((o1, o2) -> o2.value - o1.value);
+        cards = parseToCards(cardString.split(","));
+        cards.sort((o1, o2) -> o2.rank - o1.rank);
         findStraight();
         findThreeOfAKind();
         findPairs();
@@ -24,24 +24,22 @@ public class PokerHand {
 
     private void findStraight() {
         for (int i = 0; i < cards.size() - 1; i++) {
-            if (cards.get(i).value - cards.get(i + 1).value != 1) {
+            if (cards.get(i).rank - cards.get(i + 1).rank != 1) {
                 return;
             }
         }
-        straightStartingAt = cards.get(cards.size() - 1).value;
+        straightStartingAt = cards.get(cards.size() - 1).rank;
     }
 
     private boolean isStraight() {
         return straightStartingAt > 0;
     }
 
-    List<Card> parseToCards(String cardString) {
-        String[] cardArray = cardString.split(",");
+    List<Card> parseToCards(String[] cards) {
 
         List<Card> hand = new ArrayList<>();
-        for (String s : cardArray) {
-            Card card = Card.valueOf(s);
-            hand.add(card);
+        for (String s : cards) {
+            hand.add(Card.valueOf(s));
         }
 
         return hand;
@@ -49,13 +47,13 @@ public class PokerHand {
 
     private void findPairs() {
         for (int i = 0; i < cards.size() - 1; i++) {
-            if (cards.get(i).value == cards.get(i + 1).value) {
-                pairs.add(cards.get(i).value);
+            if (cards.get(i).rank == cards.get(i + 1).rank) {
+                pairs.add(cards.get(i).rank);
             }
         }
     }
 
-    boolean hasPair() {
+    private boolean hasPair() {
         return !pairs.isEmpty();
     }
 
@@ -67,7 +65,11 @@ public class PokerHand {
         return compare(other) == 0;
     }
 
-    public int compare(PokerHand other) {
+    private int compare(PokerHand other) {
+
+        if (isFlush() || other.isFlush()) {
+            return compareFlush(other);
+        }
 
         if (isStraight() || other.isStraight()) {
             return compareStraights(other);
@@ -82,6 +84,26 @@ public class PokerHand {
         }
 
         return compareHighCard(other);
+    }
+
+    private int compareFlush(PokerHand other) {
+        if (isFlush() && other.isFlush()) {
+            return compareHighCard(other);
+        }
+        if (isFlush()) {
+            return 1;
+        }
+        return -1;
+    }
+
+    private boolean isFlush() {
+
+        for (int i = 1; i < cards.size(); i++) {
+            if (!cards.get(i).suit.equals(cards.get(0).suit)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private int compareStraights(PokerHand other) {
@@ -99,15 +121,15 @@ public class PokerHand {
 
     private void findThreeOfAKind() {
         for (int i = 0; i < cards.size() - 2; i++) {
-            if (cards.get(i).value == cards.get(i + 1).value && cards.get(i).value == cards.get(i + 2).value) {
-                threesValue = cards.get(i).value;
+            if (cards.get(i).rank == cards.get(i + 1).rank && cards.get(i).rank == cards.get(i + 2).rank) {
+                threesValue = cards.get(i).rank;
             }
         }
     }
 
     private int compareHighCard(PokerHand other) {
         for (int i = 0; i < cards.size(); i++) {
-            int comparison = cards.get(i).value - other.cards.get(i).value;
+            int comparison = cards.get(i).rank - other.cards.get(i).rank;
             if (comparison != 0) {
                 return comparison;
             }
@@ -140,5 +162,20 @@ public class PokerHand {
 
         builder.deleteCharAt(builder.lastIndexOf(","));
         return builder.toString();
+    }
+
+    public boolean isFullHouse() {
+        if (cards.get(0).rank == cards.get(2).rank) {
+            if (cards.get(3).rank == cards.get(4).rank) {
+                return true;
+            }
+        }
+        if (cards.get(0).rank == cards.get(1).rank) {
+            if (cards.get(2).rank == cards.get(4).rank) {
+                return true;
+            }
+        }
+        return false;
+
     }
 }

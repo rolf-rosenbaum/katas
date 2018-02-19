@@ -55,19 +55,19 @@ public enum Card {
     HK(13, "K", "H"),
     HA(14, "A", "H");
 
-    int value;
+    final int rank;
 
-    String name;
+    final String name;
 
-    String suit;
+    final String suit;
 
     @Override
     public String toString() {
         return suit + name;
     }
 
-    Card(int value, String name, String suit) {
-        this.value = value;
+    Card(int rank, String name, String suit) {
+        this.rank = rank;
         this.name = name;
         this.suit = suit;
     }
