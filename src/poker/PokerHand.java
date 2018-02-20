@@ -13,9 +13,16 @@ public class PokerHand {
 
     private int straightStartingAt;
 
+    private int fullHouseThreesRank;
+
+    private int fullHousePairRank;
+
+
     public PokerHand(String cardString) {
         cards = parseToCards(cardString.split(","));
         cards.sort((o1, o2) -> o2.rank - o1.rank);
+
+        findFullHouse();
         findStraight();
         findThreeOfAKind();
         findPairs();
@@ -67,6 +74,10 @@ public class PokerHand {
 
     private int compare(PokerHand other) {
 
+        if (isFullHouse() || other.isFullHouse()) {
+            return compareFullHouse(other);
+        }
+
         if (isFlush() || other.isFlush()) {
             return compareFlush(other);
         }
@@ -84,6 +95,13 @@ public class PokerHand {
         }
 
         return compareHighCard(other);
+    }
+
+    private int compareFullHouse(PokerHand other) {
+        if (fullHouseThreesRank - other.fullHouseThreesRank == 0) {
+            return fullHousePairRank - other.fullHousePairRank;
+        }
+        return fullHouseThreesRank - other.fullHouseThreesRank;
     }
 
     private int compareFlush(PokerHand other) {
@@ -164,18 +182,24 @@ public class PokerHand {
         return builder.toString();
     }
 
-    public boolean isFullHouse() {
+    private void findFullHouse() {
+        // since cards are ordered by rank, this means that all three cards from 0 to 2 have equal rank
         if (cards.get(0).rank == cards.get(2).rank) {
             if (cards.get(3).rank == cards.get(4).rank) {
-                return true;
+                fullHouseThreesRank = cards.get(0).rank;
+                fullHousePairRank = cards.get(3).rank;
+            } else if (cards.get(0).rank == cards.get(1).rank) {
+                // since cards are ordered by rank, this means that all three cards from 2 to 4 have equal rank
+                if (cards.get(2).rank == cards.get(4).rank) {
+                    fullHouseThreesRank = cards.get(2).rank;
+                    fullHousePairRank = cards.get(0).rank;
+                }
             }
         }
-        if (cards.get(0).rank == cards.get(1).rank) {
-            if (cards.get(2).rank == cards.get(4).rank) {
-                return true;
-            }
-        }
-        return false;
 
+    }
+
+    public boolean isFullHouse() {
+        return fullHouseThreesRank > 0;
     }
 }
