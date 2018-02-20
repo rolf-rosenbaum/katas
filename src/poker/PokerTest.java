@@ -10,12 +10,40 @@ import static org.junit.Assert.assertTrue;
 public class PokerTest {
 
     @Test
+    public void straightFlushWinsOverLowerStraightFlush() {
+        PokerHand straightFlushLow = new PokerHand("H4,H5,H6,H7,H8");
+        PokerHand straightFlushHigh = new PokerHand("H9,HT,HJ,HK,HQ");
+
+        assertTrue(straightFlushHigh.winsOver(straightFlushLow));
+        assertFalse(straightFlushLow.winsOver(straightFlushHigh));
+
+    }
+
+    @Test
+    public void straightFlushWinsOverFours() {
+        PokerHand straightFlush = new PokerHand("H4,H5,H6,H7,H8");
+        PokerHand fourOfAKind = new PokerHand("ST,DT,CT,HT,S7");
+
+        assertTrue(straightFlush.winsOver(fourOfAKind));
+    }
+
+    @Test
+    public void foursWinsOverLoweFours() {
+        PokerHand fourOfAKindHigh = new PokerHand("SA,ST,DT,CT,HT");
+        PokerHand fourOfAKindLow = new PokerHand("S9,D9,C9,H9, D5");
+
+        assertTrue(fourOfAKindHigh.winsOver(fourOfAKindLow));
+        assertFalse(fourOfAKindLow.winsOver(fourOfAKindHigh));
+
+    }
+
+    @Test
     public void fourOfAKindWinsOverFullHouse() {
         PokerHand fullHouse = new PokerHand("SK,H3,DK,S3,HK");
         PokerHand fourOfAKind = new PokerHand("ST,DT,CT,HT,S7");
 
         assertTrue(fourOfAKind.winsOver(fullHouse));
-//        assertFalse(fullHouse.winsOver(fourOfAKind));
+        assertFalse(fullHouse.winsOver(fourOfAKind));
 
     }
 

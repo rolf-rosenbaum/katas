@@ -9,24 +9,33 @@ public class PokerHand {
 
     private List<Card> cards = new ArrayList<>();
 
-    private int threesValue;
+    private int threesRank;
 
-    private int straightStartingAt;
+    private int straightStartingRank;
 
     private int fullHouseThreesRank;
 
     private int fullHousePairRank;
+
+    private int foursRank;
 
 
     public PokerHand(String cardString) {
         cards = parseToCards(cardString.split(","));
         cards.sort((o1, o2) -> o2.rank - o1.rank);
 
+        findFours();
         findFullHouse();
         findStraight();
         findThreeOfAKind();
         findPairs();
 
+    }
+
+    private void findFours() {
+        if (cards.get(0).rank == cards.get(3).rank || cards.get(1).rank == cards.get(4).rank) {
+            foursRank = cards.get(1).rank;
+        }
     }
 
     private void findStraight() {
@@ -35,18 +44,18 @@ public class PokerHand {
                 return;
             }
         }
-        straightStartingAt = cards.get(cards.size() - 1).rank;
+        straightStartingRank = cards.get(cards.size() - 1).rank;
     }
 
     private boolean isStraight() {
-        return straightStartingAt > 0;
+        return straightStartingRank > 0;
     }
 
     List<Card> parseToCards(String[] cards) {
 
         List<Card> hand = new ArrayList<>();
         for (String s : cards) {
-            hand.add(Card.valueOf(s));
+            hand.add(Card.valueOf(s.trim()));
         }
 
         return hand;
@@ -74,6 +83,14 @@ public class PokerHand {
 
     private int compare(PokerHand other) {
 
+        if (isStraightFlush() || other.isStraightFlush()) {
+            return compareStraights(other);
+        }
+
+        if (hasFourOfAKind() || other.hasFourOfAKind()) {
+            return compareFours(other);
+        }
+
         if (isFullHouse() || other.isFullHouse()) {
             return compareFullHouse(other);
         }
@@ -95,6 +112,18 @@ public class PokerHand {
         }
 
         return compareHighCard(other);
+    }
+
+    private boolean isStraightFlush() {
+        return isFlush() && isStraight();
+    }
+
+    private int compareFours(PokerHand other) {
+        return foursRank - other.foursRank;
+    }
+
+    private boolean hasFourOfAKind() {
+        return foursRank > 0;
     }
 
     private int compareFullHouse(PokerHand other) {
@@ -125,22 +154,22 @@ public class PokerHand {
     }
 
     private int compareStraights(PokerHand other) {
-        return straightStartingAt - other.straightStartingAt;
+        return straightStartingRank - other.straightStartingRank;
     }
 
     private int compareThrees(PokerHand other) {
-        return threesValue - other.threesValue;
+        return threesRank - other.threesRank;
     }
 
     private boolean hasThreeOfAKind() {
-        return threesValue > 0;
+        return threesRank > 0;
 
     }
 
     private void findThreeOfAKind() {
         for (int i = 0; i < cards.size() - 2; i++) {
             if (cards.get(i).rank == cards.get(i + 1).rank && cards.get(i).rank == cards.get(i + 2).rank) {
-                threesValue = cards.get(i).rank;
+                threesRank = cards.get(i).rank;
             }
         }
     }
