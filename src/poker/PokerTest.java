@@ -20,6 +20,15 @@ public class PokerTest {
     }
 
     @Test
+    public void straghtFlushWinsOverHigherStraight() {
+        PokerHand straightFlush = new PokerHand("H4,H5,H6,H7,H8");
+        PokerHand straight= new PokerHand("D9,HT,HJ,HK,HQ");
+
+        assertTrue(straightFlush.winsOver(straight));
+        assertFalse(straight.winsOver(straightFlush));
+    }
+
+    @Test
     public void straightFlushWinsOverFours() {
         PokerHand straightFlush = new PokerHand("H4,H5,H6,H7,H8");
         PokerHand fourOfAKind = new PokerHand("ST,DT,CT,HT,S7");
@@ -28,7 +37,7 @@ public class PokerTest {
     }
 
     @Test
-    public void foursWinsOverLoweFours() {
+    public void foursWinsOverLowFours() {
         PokerHand fourOfAKindHigh = new PokerHand("SA,ST,DT,CT,HT");
         PokerHand fourOfAKindLow = new PokerHand("S9,D9,C9,H9, D5");
 

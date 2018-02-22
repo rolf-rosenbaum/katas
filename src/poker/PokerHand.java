@@ -1,6 +1,7 @@
 package poker;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class PokerHand {
@@ -18,7 +19,6 @@ public class PokerHand {
     private int fullHousePairRank;
 
     private int foursRank;
-
 
     public PokerHand(String cardString) {
         cards = parseToCards(cardString.split(","));
@@ -69,10 +69,6 @@ public class PokerHand {
         }
     }
 
-    private boolean hasPair() {
-        return !pairs.isEmpty();
-    }
-
     public boolean winsOver(PokerHand other) {
         return compare(other) > 0;
     }
@@ -83,64 +79,29 @@ public class PokerHand {
 
     private int compare(PokerHand other) {
 
-        if (isStraightFlush() || other.isStraightFlush()) {
-            return compareStraights(other);
-        }
+        Collection<HandComparator> comparators = new ArrayList<>();
 
-        if (hasFourOfAKind() || other.hasFourOfAKind()) {
-            return compareFours(other);
-        }
+        comparators.add(new StraightFlushComparator());
+        comparators.add(new FoursComparator());
+        comparators.add(new FullHouseComparator());
+        comparators.add(new FlushComparator());
+        comparators.add(new StraightComparator());
+        comparators.add(new ThreesComparator());
+        comparators.add(new PairComparator());
+        comparators.add(new HighCardComparator());
 
-        if (isFullHouse() || other.isFullHouse()) {
-            return compareFullHouse(other);
+        int result = 0;
+        for (HandComparator comparator : comparators) {
+            result = comparator.compare(this, other);
+            if (result != 0) {
+                return result;
+            }
         }
-
-        if (isFlush() || other.isFlush()) {
-            return compareFlush(other);
-        }
-
-        if (isStraight() || other.isStraight()) {
-            return compareStraights(other);
-        }
-
-        if (hasThreeOfAKind() || other.hasThreeOfAKind()) {
-            return compareThrees(other);
-        }
-
-        if (hasPair() || other.hasPair()) {
-            return comparePairs(other);
-        }
-
-        return compareHighCard(other);
+        return result;
     }
 
-    private boolean isStraightFlush() {
+    boolean isStraightFlush() {
         return isFlush() && isStraight();
-    }
-
-    private int compareFours(PokerHand other) {
-        return foursRank - other.foursRank;
-    }
-
-    private boolean hasFourOfAKind() {
-        return foursRank > 0;
-    }
-
-    private int compareFullHouse(PokerHand other) {
-        if (fullHouseThreesRank - other.fullHouseThreesRank == 0) {
-            return fullHousePairRank - other.fullHousePairRank;
-        }
-        return fullHouseThreesRank - other.fullHouseThreesRank;
-    }
-
-    private int compareFlush(PokerHand other) {
-        if (isFlush() && other.isFlush()) {
-            return compareHighCard(other);
-        }
-        if (isFlush()) {
-            return 1;
-        }
-        return -1;
     }
 
     private boolean isFlush() {
@@ -153,50 +114,12 @@ public class PokerHand {
         return true;
     }
 
-    private int compareStraights(PokerHand other) {
-        return straightStartingRank - other.straightStartingRank;
-    }
-
-    private int compareThrees(PokerHand other) {
-        return threesRank - other.threesRank;
-    }
-
-    private boolean hasThreeOfAKind() {
-        return threesRank > 0;
-
-    }
-
     private void findThreeOfAKind() {
         for (int i = 0; i < cards.size() - 2; i++) {
             if (cards.get(i).rank == cards.get(i + 1).rank && cards.get(i).rank == cards.get(i + 2).rank) {
                 threesRank = cards.get(i).rank;
             }
         }
-    }
-
-    private int compareHighCard(PokerHand other) {
-        for (int i = 0; i < cards.size(); i++) {
-            int comparison = cards.get(i).rank - other.cards.get(i).rank;
-            if (comparison != 0) {
-                return comparison;
-            }
-        }
-        return 0;
-    }
-
-    private int comparePairs(PokerHand otherHand) {
-        int comp = pairs.size() - otherHand.pairs.size();
-        if (comp != 0) {
-            return comp;
-        }
-
-        for (int i = 0; i < pairs.size(); i++) {
-            comp = pairs.get(i) - otherHand.pairs.get(i);
-            if (comp != 0) {
-                return comp;
-            }
-        }
-        return comp;
     }
 
     @Override
@@ -230,5 +153,111 @@ public class PokerHand {
 
     public boolean isFullHouse() {
         return fullHouseThreesRank > 0;
+    }
+
+    private class FlushComparator implements HandComparator {
+
+        @Override
+        public int compare(PokerHand o1, PokerHand o2) {
+            if (o1.isFlush() && o2.isFlush()) {
+                return new HighCardComparator().compare(o1, o2);
+            }
+            if (o1.isFlush()) {
+                return 1;
+            }
+            if (o2.isFlush()) {
+                return -1;
+
+            }
+            return 0;
+        }
+    }
+
+    private class FullHouseComparator implements HandComparator {
+
+        @Override
+        public int compare(PokerHand o1, PokerHand o2) {
+            if (o1.fullHouseThreesRank - o2.fullHouseThreesRank == 0) {
+                return o1.fullHousePairRank - o2.fullHousePairRank;
+            }
+            return o1.fullHouseThreesRank - o2.fullHouseThreesRank;
+        }
+    }
+
+    private class FoursComparator implements HandComparator {
+
+        @Override
+        public int compare(PokerHand hand1, PokerHand hand2) {
+            return hand1.foursRank - hand2.foursRank;
+        }
+    }
+
+    private class StraightFlushComparator implements HandComparator {
+
+        @Override
+        public int compare(PokerHand o1, PokerHand o2) {
+            if (o1.isStraightFlush() && o2.isStraightFlush()) {
+                return new StraightComparator().compare(o1, o2);
+            } else {
+                if (o1.isStraightFlush()) {
+                    return 1;
+                }
+                if (o2.isStraightFlush()) {
+                    return -1;
+                }
+            }
+            return 0;
+        }
+    }
+
+    private class StraightComparator implements HandComparator {
+
+        @Override
+        public int compare(PokerHand o1, PokerHand o2) {
+            return o1.straightStartingRank - o2.straightStartingRank;
+        }
+    }
+
+    private class ThreesComparator implements HandComparator {
+
+        @Override
+        public int compare(PokerHand o1, PokerHand o2) {
+            return o1.threesRank - o2.threesRank;
+        }
+    }
+
+    private class PairComparator implements HandComparator {
+
+        @Override
+        public int compare(PokerHand o1, PokerHand o2) {
+            int comp = o1.pairs.size() - o2.pairs.size();
+
+            // two pairs beats one pair
+            if (comp != 0) {
+                return comp;
+            }
+
+            for (int i = 0; i < pairs.size(); i++) {
+                comp = o1.pairs.get(i) - o2.pairs.get(i);
+                if (comp != 0) {
+                    return comp;
+                }
+            }
+            return comp;
+        }
+    }
+
+    private class HighCardComparator implements HandComparator {
+
+        @Override
+        public int compare(PokerHand o1, PokerHand o2) {
+            for (int i = 0; i < cards.size(); i++) {
+                int comparison = o1.cards.get(i).rank - o2.cards.get(i).rank;
+                if (comparison != 0) {
+                    return comparison;
+                }
+            }
+            return 0;
+        }
     }
 }
