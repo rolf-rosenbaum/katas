@@ -20,7 +20,20 @@ public class PokerHand {
 
     private int foursRank;
 
+    Collection<HandComparator> comparators = new ArrayList<>();
+
+
+
     public PokerHand(String cardString) {
+        comparators.add(new StraightFlushComparator());
+        comparators.add(new FoursComparator());
+        comparators.add(new FullHouseComparator());
+        comparators.add(new FlushComparator());
+        comparators.add(new StraightComparator());
+        comparators.add(new ThreesComparator());
+        comparators.add(new PairComparator());
+        comparators.add(new HighCardComparator());
+
         cards = parseToCards(cardString.split(","));
         cards.sort((o1, o2) -> o2.rank - o1.rank);
 
@@ -78,18 +91,6 @@ public class PokerHand {
     }
 
     private int compare(PokerHand other) {
-
-        Collection<HandComparator> comparators = new ArrayList<>();
-
-        comparators.add(new StraightFlushComparator());
-        comparators.add(new FoursComparator());
-        comparators.add(new FullHouseComparator());
-        comparators.add(new FlushComparator());
-        comparators.add(new StraightComparator());
-        comparators.add(new ThreesComparator());
-        comparators.add(new PairComparator());
-        comparators.add(new HighCardComparator());
-
         int result = 0;
         for (HandComparator comparator : comparators) {
             result = comparator.compare(this, other);

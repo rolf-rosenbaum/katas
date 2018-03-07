@@ -7,7 +7,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings("ClassWithTooManyMethods")
 public class PokerTest {
+
+    @Test
+    public void twoPairsLastCardDecides() {
+        PokerHand twoPairsWithAce = new PokerHand("H4, D4, H7, D7, DA");
+        PokerHand twoPairsWithKing = new PokerHand("S4, C4, S7, C7, DK");
+
+        assertTrue(twoPairsWithAce.winsOver(twoPairsWithKing));
+        assertFalse(twoPairsWithKing.winsOver(twoPairsWithAce));
+    }
 
     @Test
     public void straightFlushWinsOverLowerStraightFlush() {
